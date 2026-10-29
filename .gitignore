@@ -1,0 +1,31 @@
+# 密钥与本地配置（务必保留，避免 Key 泄露）
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+env/
+
+# 测试 / 静态检查缓存
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# IDE 与操作系统
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# 运行产物
+output/
+*.log

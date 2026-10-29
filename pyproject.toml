@@ -1,0 +1,46 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm-learning-lab"
+version = "0.1.0"
+description = "LLM 入门实践：OpenAI 兼容接口调用、提示词模式与 Streamlit 问卷分析应用"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "tianhao67" }]
+keywords = ["llm", "prompt-engineering", "openai", "deepseek", "streamlit"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "openai>=1.40.0",
+    "python-dotenv>=1.0.0",
+    "streamlit>=1.36.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.5",
+]
+
+[project.scripts]
+llm-demo = "llm_demo.__main__:main"
+
+[tool.setuptools]
+packages = ["llm_demo"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
