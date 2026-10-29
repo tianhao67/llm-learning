@@ -3,10 +3,20 @@
 [![CI](https://github.com/tianhao67/llm-learning/actions/workflows/ci.yml/badge.svg)](https://github.com/tianhao67/llm-learning/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://llm-learning-tianhao67.streamlit.app/)
 
 一个面向初学者的 **LLM 应用实践**项目：用 OpenAI 兼容接口调用大模型，练习提示词模式与
 RAG 检索增强，并用 Streamlit 实现「学习需求问卷」和「课程笔记问答」两个小应用。
 项目自带一套可复现的评测脚本，用来回答一个工程问题：**改了提示词之后，效果是变好还是变差？**
+
+## 在线体验
+
+👉 **<https://llm-learning-tianhao67.streamlit.app/>**
+
+> 部署在 Streamlit Community Cloud 的免费实例上，长时间无人访问会休眠，
+> 第一次打开可能需要等 30 秒左右唤醒。
+
+![应用截图](docs/images/app.png)
 
 > 说明：本项目是学习大模型基础课程时的练习整理，重点不是算法创新，而是把零散脚本
 > 整理成**结构清晰、可测试、可评测、可复现**的小工程。阅读代码时请以学习参考为主，
@@ -201,7 +211,9 @@ python -m llm_demo --json "用 JSON 返回：{'name': '小明', 'city': '南京'
 
 ## 部署
 
-`app.py` 可以直接部署到 Streamlit Community Cloud 或 Hugging Face Spaces，步骤和注意事项
+项目已部署在 Streamlit Community Cloud：<https://llm-learning-tianhao67.streamlit.app/>。
+
+`app.py` 也可以部署到你自己的 Streamlit Cloud 或 Hugging Face Spaces，步骤和注意事项
 见 [docs/deploy.md](docs/deploy.md)。密钥只填在平台的 Secrets 里，不要提交任何配置文件。
 
 ## 这个项目练到了什么
