@@ -5,12 +5,12 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "llm-learning-lab"
 version = "0.1.0"
-description = "LLM 入门实践：OpenAI 兼容接口调用、提示词模式与 Streamlit 问卷分析应用"
+description = "LLM 应用实践：OpenAI 兼容接口、提示词工程、RAG 检索与离线评测"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 authors = [{ name = "tianhao67" }]
-keywords = ["llm", "prompt-engineering", "openai", "deepseek", "streamlit"]
+keywords = ["llm", "prompt-engineering", "openai", "deepseek", "rag", "streamlit"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
