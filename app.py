@@ -19,7 +19,10 @@ ROOT = Path(__file__).resolve().parent
 CORPUS_DIR = ROOT / "data" / "corpus"
 
 #: 需要从 Streamlit Secrets 注入环境变量的配置项
-SECRET_KEYS = ("OPENAI_API_KEY", "OPENAI_BASE_URL", "OPENAI_MODEL")
+SECRET_KEYS = ("OPENAI_API_KEY", "OPENAI_BASE_URL", "OPENAI_MODEL", "APP_PASSWORD")
+
+#: 每个浏览器会话最多调用几次模型，避免公开链接被刷爆余额
+MAX_CALLS_PER_SESSION = 5
 
 SAMPLE_ANSWERS: dict[str, str] = {
     "city_job": "在南京读大三，信息安全专业，目前没有实习经历。",
@@ -78,6 +81,35 @@ def chunk_preview(text: str) -> str:
     return "  \n".join(line for line in lines if line)
 
 
+def check_access() -> bool:
+    """可选的访问口令：设置 ``APP_PASSWORD`` 后才会生效。"""
+    password = os.environ.get("APP_PASSWORD", "")
+    if not password:
+        return True
+    entered = st.text_input("访问口令", type="password", key="app_password")
+    if entered != password:
+        st.info("这是公开演示，配置了访问口令，请向项目所有者获取。")
+        return False
+    return True
+
+
+def quota_available() -> bool:
+    """检查本次会话是否还有调用额度。"""
+    used = int(st.session_state.get("usage_count", 0))
+    if used >= MAX_CALLS_PER_SESSION:
+        st.warning(
+            f"本次会话的 {MAX_CALLS_PER_SESSION} 次额度已用完。这是公开演示，"
+            "额度用于控制 API 成本；刷新页面可重置，但请节约使用。"
+        )
+        return False
+    return True
+
+
+def record_call() -> None:
+    """记录一次模型调用。"""
+    st.session_state["usage_count"] = int(st.session_state.get("usage_count", 0)) + 1
+
+
 def render_survey(client: LLMClient, temperature: float) -> None:
     st.markdown("填写 6 个问题，模型会给出个性化的学习路径建议。可展开查看完整提示词，方便调试。")
 
@@ -102,12 +134,16 @@ def render_survey(client: LLMClient, temperature: float) -> None:
     with st.expander("查看发送给模型的完整提示词"):
         st.code(prompt, language="text")
 
+    if not quota_available():
+        return
+
     try:
         with st.spinner("正在请求大模型，请稍候……"):
-            result = client.chat(prompt, temperature=temperature)
+            result = client.chat(prompt, temperature=temperature, max_tokens=900)
     except Exception as exc:  # noqa: BLE001 - 界面需要展示任何调用错误
         st.error(f"调用失败：{exc}")
         return
+    record_call()
 
     st.subheader("学习建议")
     st.markdown(result)
@@ -132,6 +168,8 @@ def render_rag(client: LLMClient, temperature: float) -> None:
     if not question.strip():
         st.warning("请输入问题。")
         return
+    if not quota_available():
+        return
 
     try:
         with st.spinner("正在检索并生成回答……"):
@@ -141,6 +179,7 @@ def render_rag(client: LLMClient, temperature: float) -> None:
     except Exception as exc:  # noqa: BLE001 - 界面需要展示任何调用错误
         st.error(f"调用失败：{exc}")
         return
+    record_call()
 
     st.subheader("回答")
     st.markdown(result.answer)
@@ -169,12 +208,17 @@ def main() -> None:
         )
         st.stop()
 
+    if not check_access():
+        st.stop()
+
     with st.sidebar:
         st.subheader("当前配置")
         st.write(f"**接口**：`{settings.base_url}`")
         st.write(f"**模型**：`{settings.model}`")
         st.write(f"**密钥**：`{settings.masked_api_key}`")
         temperature = st.slider("temperature（越低越稳定）", 0.0, 1.0, 0.0, 0.1)
+        used = int(st.session_state.get("usage_count", 0))
+        st.caption(f"本次会话已用 {used} / {MAX_CALLS_PER_SESSION} 次模型调用")
         if st.button("问卷填入示例数据", use_container_width=True):
             for question in SURVEY_QUESTIONS:
                 st.session_state[question["key"]] = SAMPLE_ANSWERS[question["key"]]

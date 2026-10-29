@@ -48,6 +48,14 @@ $env:OPENAI_MODEL="deepseek-chat"
 streamlit run app.py
 ```
 
+## 成本与访问控制
+
+公开部署意味着任何人都能调用你的 Key，**每次生成都花你的余额**。项目内置了：
+
+- 单会话 5 次调用上限，问卷回答限制 900 tokens；
+- 可选访问口令：在 Secrets 里加 `APP_PASSWORD = "..."`，打开应用先输口令；
+- 建议在模型平台设置余额提醒/用量上限，演示用小额 Key，异常时直接吊销。
+
 ## 上线前检查清单
 
 - [ ] `git ls-files | findstr /i ".env"` 只看到 `.env.example`；
