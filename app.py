@@ -68,6 +68,16 @@ def get_client(settings: Settings) -> LLMClient:
     return LLMClient(settings)
 
 
+def chunk_preview(text: str) -> str:
+    """把检索片段转成适合展示的正文。
+
+    语料是 Markdown，片段里可能带着 ``##`` 标题标记；直接渲染会变成大标题，
+    这里去掉行首的 ``#``，并用 Markdown 硬换行保留段落和列表结构。
+    """
+    lines = [line.lstrip("#").strip() for line in text.splitlines()]
+    return "  \n".join(line for line in lines if line)
+
+
 def render_survey(client: LLMClient, temperature: float) -> None:
     st.markdown("填写 6 个问题，模型会给出个性化的学习路径建议。可展开查看完整提示词，方便调试。")
 
@@ -139,8 +149,8 @@ def render_rag(client: LLMClient, temperature: float) -> None:
 
     with st.expander(f"检索到的资料（top-{len(result.hits)}）"):
         for number, hit in enumerate(result.hits, start=1):
-            st.markdown(f"**[{number}] {hit.chunk.title}** · 相似度 {hit.score:.3f}")
-            st.code(hit.chunk.text, language="text")
+            st.markdown(f"**[{number}] {hit.chunk.title}** · 相似度（TF-IDF）{hit.score:.3f}")
+            st.markdown(chunk_preview(hit.chunk.text))
 
 
 def main() -> None:

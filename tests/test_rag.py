@@ -13,6 +13,7 @@ from llm_demo.rag import (
     chunk_text,
     load_documents,
     parse_citations,
+    split_sentences,
     tokenize,
 )
 
@@ -34,6 +35,19 @@ def test_chunk_text_respects_size_and_overlap():
     assert len(chunks) > 1
     assert all(len(chunk) <= 60 for chunk in chunks)
     assert chunks[0].startswith("这是第一句话")
+
+
+def test_chunk_text_never_splits_a_sentence():
+    text = "第一句说完了。第二句也说完了。第三句同样结束了。第四句收尾。"
+
+    chunks = chunk_text(text, size=40, overlap=10)
+
+    assert all(chunk.endswith("。") for chunk in chunks)
+    assert "".join(chunks).count("第一句说完了。") >= 1
+
+
+def test_split_sentences_keeps_punctuation():
+    assert split_sentences("第一句。第二句！第三句？") == ["第一句。", "第二句！", "第三句？"]
 
 
 def test_chunk_text_rejects_bad_arguments():

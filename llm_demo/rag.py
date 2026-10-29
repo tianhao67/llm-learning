@@ -22,7 +22,6 @@ from .client import LLMClient
 
 _CJK_RUN = re.compile(r"[\u4e00-\u9fff]+")
 _WORD = re.compile(r"[a-z0-9]+")
-_SENTENCE_ENDS = "。！？!?；;\n"
 _CITATION = re.compile(r"[\[【](\d+)[\]】]")
 
 RAG_SYSTEM = (
@@ -94,13 +93,29 @@ def tokenize(text: str) -> list[str]:
     return tokens
 
 
+_SENTENCE_SPLIT = re.compile(r"(?<=[。！？!?；;])")
+
+
+def split_sentences(text: str) -> list[str]:
+    """按中英文句末标点切句，保留标点。
+
+    只按标点切、不按换行切：Markdown 原文会在 80 字左右硬换行，
+    如果按换行切，会造出「汉字，块与块之间重叠……」这种半句开头的片段。
+    """
+    parts = _SENTENCE_SPLIT.split(text or "")
+    return [part.strip(" \t") for part in parts if part.strip()]
+
+
 def chunk_text(text: str, size: int = 240, overlap: int = 48) -> list[str]:
-    """按字符长度切分文本，并尽量在句子边界处断开。
+    """按句子边界切分文本，块与块之间保留若干整句作为重叠。
+
+    与按字符硬切相比，这样不会把一句话从中间截断，检索出来的片段读起来更自然；
+    重叠按「不超过 ``overlap`` 个字符的末尾整句」计算，而不是固定回退字符数。
 
     Args:
         text: 原始文本。
         size: 每块最多包含的字符数。
-        overlap: 相邻块之间重叠的字符数，用于避免语义被截断。
+        overlap: 相邻块之间允许重叠的字符数上限。
 
     Raises:
         ValueError: ``size`` 非正数，或 ``overlap`` 不在 ``[0, size)`` 区间内。
@@ -114,20 +129,36 @@ def chunk_text(text: str, size: int = 240, overlap: int = 48) -> list[str]:
         return []
 
     chunks: list[str] = []
-    start = 0
-    while start < len(text):
-        end = min(start + size, len(text))
-        if end < len(text):
-            cut = max(text.rfind(char, start, end) for char in _SENTENCE_ENDS)
-            if cut > start + size // 2:
-                end = cut + 1
-        piece = text[start:end].strip()
-        if piece:
-            chunks.append(piece)
-        if end >= len(text):
-            break
-        start = max(end - overlap, start + 1)
-    return chunks
+    current: list[str] = []
+    current_length = 0
+
+    for sentence in split_sentences(text):
+        if len(sentence) > size:
+            if current:
+                chunks.append("".join(current).strip())
+                current, current_length = [], 0
+            for start in range(0, len(sentence), size):
+                chunks.append(sentence[start : start + size])
+            continue
+
+        if current and current_length + len(sentence) > size:
+            chunks.append("".join(current).strip())
+            kept: list[str] = []
+            kept_length = 0
+            for previous in reversed(current):
+                if kept_length + len(previous) > overlap:
+                    break
+                kept.insert(0, previous)
+                kept_length += len(previous)
+            current = kept
+            current_length = kept_length
+
+        current.append(sentence)
+        current_length += len(sentence)
+
+    if current:
+        chunks.append("".join(current).strip())
+    return [chunk for chunk in chunks if chunk]
 
 
 def load_documents(directory: Path) -> list[Document]:
