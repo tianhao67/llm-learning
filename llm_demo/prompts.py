@@ -97,23 +97,43 @@ SURVEY_QUESTIONS: tuple[dict[str, str], ...] = (
 )
 
 
-def build_survey_prompt(answers: Mapping[str, str]) -> str:
+#: 评测用的三个提示词版本：数字越大，提示词越完整
+SURVEY_VARIANTS: dict[str, str] = {
+    "v1": "只有指令，没有示例和约束",
+    "v2": "指令 + 两组少样本示例",
+    "v3": "指令 + 示例 + 用户输入 + 约束（默认）",
+}
+
+
+def build_survey_prompt(answers: Mapping[str, str], variant: str = "v3") -> str:
     """把问卷答案拼成发给模型的完整提示词。
 
     空答案会被替换成「未填写」，保证提示词结构稳定，方便对比不同模型的表现。
+    不同 ``variant`` 用于评测实验，见 :data:`SURVEY_VARIANTS`。
 
     Args:
         answers: 键为 :data:`SURVEY_QUESTIONS` 中的 ``key``。
+        variant: 提示词版本，``v1`` / ``v2`` / ``v3``。
+
+    Raises:
+        KeyError: 版本号不存在时抛出。
     """
+    if variant not in SURVEY_VARIANTS:
+        available = "、".join(SURVEY_VARIANTS)
+        raise KeyError(f"未知的提示词版本：{variant!r}，可用版本：{available}")
 
     def answer_of(key: str) -> str:
         return (answers.get(key) or "").strip() or "未填写"
 
-    lines: list[str] = [SURVEY_INSTRUCTION, "", "参考示例：", SURVEY_EXAMPLES, "", "用户输入："]
+    lines: list[str] = [SURVEY_INSTRUCTION, ""]
+    if variant in {"v2", "v3"}:
+        lines.extend(["参考示例：", SURVEY_EXAMPLES, ""])
+    lines.append("用户输入：")
     for question in SURVEY_QUESTIONS:
         lines.append(question["label"])
         lines.append(f"回答：{answer_of(question['key'])}")
-    lines.extend(["", "限制：", SURVEY_LIMITS])
+    if variant == "v3":
+        lines.extend(["", "限制：", SURVEY_LIMITS])
     return "\n".join(lines).strip() + "\n"
 
 

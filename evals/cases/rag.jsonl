@@ -1,0 +1,15 @@
+{"id": "r01", "question": "chunk 大小一般怎么选？块之间要重叠多少？", "expected_doc": "03-RAG检索增强", "expected_terms": ["200", "500", "重叠"]}
+{"id": "r02", "question": "recall@k 衡量的是什么？", "expected_doc": "03-RAG检索增强", "expected_terms": ["前 k", "检索", "比例"]}
+{"id": "r03", "question": "RAG 的完整流程有哪几步？", "expected_doc": "03-RAG检索增强", "expected_terms": ["切分", "检索", "生成"]}
+{"id": "r04", "question": "temperature 取 0 和取 0.8 有什么区别？", "expected_doc": "01-大模型基础", "expected_terms": ["稳定", "随机", "0"]}
+{"id": "r05", "question": "什么是幻觉？有哪些降低幻觉的方法？", "expected_doc": "01-大模型基础", "expected_terms": ["事实错误", "引用", "不知道"]}
+{"id": "r06", "question": "上下文窗口是什么？超出会怎样？", "expected_doc": "01-大模型基础", "expected_terms": ["token", "截断", "窗口"]}
+{"id": "r07", "question": "提示词的四个基本要素是什么？", "expected_doc": "02-提示词工程", "expected_terms": ["角色", "任务", "示例", "约束"]}
+{"id": "r08", "question": "少样本提示一般给几组示例？", "expected_doc": "02-提示词工程", "expected_terms": ["1", "3", "示例"]}
+{"id": "r09", "question": "思维链适合什么任务？有什么代价？", "expected_doc": "02-提示词工程", "expected_terms": ["推理", "token", "数学"]}
+{"id": "r10", "question": "怎么降低推理成本和延迟？", "expected_doc": "04-模型选型与成本", "expected_terms": ["缓存", "流式", "小模型"]}
+{"id": "r11", "question": "模型选型应该用什么方法？", "expected_doc": "04-模型选型与成本", "expected_terms": ["评测", "延迟", "成本"]}
+{"id": "r12", "question": "prompt injection 是什么？怎么防护？", "expected_doc": "05-评测与安全", "expected_terms": ["指令", "分隔符", "校验"]}
+{"id": "r13", "question": "LLM-as-judge 有什么偏差？适合怎么用？", "expected_doc": "05-评测与安全", "expected_terms": ["偏好", "人工", "抽查"]}
+{"id": "r14", "question": "评测集一般多大？为什么要做回归测试？", "expected_doc": "05-评测与安全", "expected_terms": ["20", "50", "回归"]}
+{"id": "r15", "question": "本地 Ollama 适合什么场景？", "expected_doc": "04-模型选型与成本", "expected_terms": ["隐私", "本地", "GPU"]}

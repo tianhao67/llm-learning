@@ -1,0 +1,12 @@
+{"id": "s01", "answers": {"city_job": "刚高中毕业，在长沙，准大学生", "awareness": "一张白纸", "goal": "大学期间想靠 AI 赚钱，毕业直接工作", "programming": "没有编程基础", "time": "每天两小时，晚上", "extra": "无"}, "must_include": ["Python", "基础", "入门"]}
+{"id": "s02", "answers": {"city_job": "北京，在职，农业相关", "awareness": "比较浅薄", "goal": "个人能力提升和业务需要", "programming": "有 Python 基础", "time": "每天三小时，晚上 18 点后", "extra": "无"}, "must_include": ["Python", "时间", "应用"]}
+{"id": "s03", "answers": {"city_job": "南京，大三，信息安全专业", "awareness": "会调用 API，了解 Transformer", "goal": "找大模型应用开发实习", "programming": "熟悉 Python，写过 Django", "time": "每天两小时，晚上", "extra": "想知道面试考什么"}, "must_include": ["项目", "实习", "简历"]}
+{"id": "s04", "answers": {"city_job": "上海，在职产品经理", "awareness": "了解概念，没写过代码", "goal": "设计 AI 产品方案", "programming": "不会编程", "time": "每天一小时，午休", "extra": "想和研发沟通更顺畅"}, "must_include": ["场景", "需求", "数据"]}
+{"id": "s05", "answers": {"city_job": "成都，测试工程师", "awareness": "用过 ChatGPT", "goal": "转型 AI 测试", "programming": "会写 Python 脚本", "time": "每天两小时，周末更多", "extra": "无"}, "must_include": ["测试", "用例", "自动化"]}
+{"id": "s06", "answers": {"city_job": "广州，大三，准备考研", "awareness": "零基础", "goal": "考研复试加分", "programming": "没写过代码", "time": "每天三小时，晚上", "extra": "数学一般"}, "must_include": ["基础", "数学", "项目"]}
+{"id": "s07", "answers": {"city_job": "武汉，研一，计算机", "awareness": "了解 Transformer 原理", "goal": "发一篇论文", "programming": "会 Python，用过 PyTorch", "time": "每天四小时", "extra": "实验室有 GPU"}, "must_include": ["论文", "实验", "复现"]}
+{"id": "s08", "answers": {"city_job": "杭州，新媒体运营", "awareness": "只会用聊天工具", "goal": "提高写文案效率", "programming": "不会代码", "time": "每天一小时", "extra": "不想学编程"}, "must_include": ["工具", "模板", "场景"]}
+{"id": "s09", "answers": {"city_job": "深圳，应届生，Java 开发", "awareness": "了解大模型基本概念", "goal": "找 AI 应用开发工作", "programming": "会 Java，不会 Python", "time": "每天四小时", "extra": "无"}, "must_include": ["Python", "项目", "面试"]}
+{"id": "s10", "answers": {"city_job": "西安，大二，软件工程", "awareness": "看过科普", "goal": "完成课程设计", "programming": "学过 C 语言", "time": "每天两小时", "extra": "无"}, "must_include": ["Python", "练习", "项目"]}
+{"id": "s11", "answers": {"city_job": "苏州，在职财务", "awareness": "没接触过", "goal": "自动生成报表分析", "programming": "不会编程，Excel 熟练", "time": "每天一个半小时，晚上", "extra": "担心学不会"}, "must_include": ["Excel", "自动化", "工具"]}
+{"id": "s12", "answers": {"city_job": "天津，大三，软件工程", "awareness": "会调 API，做过小 demo", "goal": "做毕业设计", "programming": "熟悉 Python", "time": "每天五小时", "extra": "想做 RAG 方向"}, "must_include": ["毕设", "数据集", "评测"]}

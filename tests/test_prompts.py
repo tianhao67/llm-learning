@@ -7,6 +7,7 @@ import pytest
 from llm_demo.prompts import (
     PROMPT_PATTERNS,
     SURVEY_QUESTIONS,
+    SURVEY_VARIANTS,
     build_survey_prompt,
     render_pattern,
 )
@@ -50,3 +51,23 @@ def test_render_pattern_replaces_text(name):
 def test_unknown_pattern_raises():
     with pytest.raises(KeyError, match="未知的提示词模式"):
         render_pattern("not-exist", "x")
+
+
+def test_variants_differ_in_examples_and_limits():
+    answers = {question["key"]: "测试回答" for question in SURVEY_QUESTIONS}
+
+    v1 = build_survey_prompt(answers, variant="v1")
+    v2 = build_survey_prompt(answers, variant="v2")
+    v3 = build_survey_prompt(answers, variant="v3")
+
+    assert "示例1" not in v1 and "限制：" not in v1
+    assert "示例1" in v2 and "限制：" not in v2
+    assert "示例1" in v3 and "限制：" in v3
+    for prompt in (v1, v2, v3):
+        assert "测试回答" in prompt
+    assert set(SURVEY_VARIANTS) == {"v1", "v2", "v3"}
+
+
+def test_unknown_variant_raises():
+    with pytest.raises(KeyError, match="未知的提示词版本"):
+        build_survey_prompt({}, variant="v9")
