@@ -1,4 +1,4 @@
-"""Streamlit 应用：填写学习需求问卷，生成个性化学习建议。
+"""Streamlit 应用：学习需求问卷 + 课程笔记问答（RAG）。
 
 本地运行：
     streamlit run app.py
@@ -6,10 +6,16 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import streamlit as st
 
 from llm_demo import ConfigError, LLMClient, Settings
 from llm_demo.prompts import SURVEY_QUESTIONS, build_survey_prompt
+from llm_demo.rag import Retriever, answer_question
+
+ROOT = Path(__file__).resolve().parent
+CORPUS_DIR = ROOT / "data" / "corpus"
 
 SAMPLE_ANSWERS: dict[str, str] = {
     "city_job": "在南京读大三，信息安全专业，目前没有实习经历。",
@@ -27,28 +33,14 @@ def load_settings() -> Settings:
     return Settings.from_env()
 
 
-def main() -> None:
-    st.set_page_config(page_title="大模型学习需求调查", page_icon="📝", layout="centered")
-    st.title("📝 大模型学习需求调查")
-    st.caption("填写 6 个问题，模型会给出个性化的学习路径建议。这是一个学习示例，不是生产系统。")
+@st.cache_resource(show_spinner=False)
+def load_retriever() -> Retriever:
+    """课程笔记的检索索引，构建一次后复用。"""
+    return Retriever.from_directory(CORPUS_DIR)
 
-    try:
-        settings = load_settings()
-    except ConfigError as exc:
-        st.error(f"未配置 API Key：{exc}")
-        st.info("复制 `.env.example` 为 `.env` 并填入 Key，然后重启应用。")
-        st.stop()
 
-    with st.sidebar:
-        st.subheader("当前配置")
-        st.write(f"**接口**：`{settings.base_url}`")
-        st.write(f"**模型**：`{settings.model}`")
-        st.write(f"**密钥**：`{settings.masked_api_key}`")
-        temperature = st.slider("temperature（越低越稳定）", 0.0, 1.0, 0.0, 0.1)
-        if st.button("填入示例数据", use_container_width=True):
-            for question in SURVEY_QUESTIONS:
-                st.session_state[question["key"]] = SAMPLE_ANSWERS[question["key"]]
-            st.rerun()
+def render_survey(client: LLMClient, temperature: float) -> None:
+    st.markdown("填写 6 个问题，模型会给出个性化的学习路径建议。可展开查看完整提示词，方便调试。")
 
     with st.form("survey_form"):
         answers: dict[str, str] = {}
@@ -63,7 +55,6 @@ def main() -> None:
 
     if not submitted:
         return
-
     if not any(value.strip() for value in answers.values()):
         st.warning("请至少填写一个问题。")
         return
@@ -74,13 +65,84 @@ def main() -> None:
 
     try:
         with st.spinner("正在请求大模型，请稍候……"):
-            result = LLMClient(settings).chat(prompt, temperature=temperature)
+            result = client.chat(prompt, temperature=temperature)
     except Exception as exc:  # noqa: BLE001 - 界面需要展示任何调用错误
         st.error(f"调用失败：{exc}")
         return
 
     st.subheader("学习建议")
     st.markdown(result)
+
+
+def render_rag(client: LLMClient, temperature: float) -> None:
+    st.markdown(
+        "先从 `data/corpus` 的课程笔记里检索相关片段，再让模型**只依据检索结果**回答，"
+        "并要求标注引用。可以展开看检索到了哪些内容。"
+    )
+
+    question = st.text_input(
+        "输入问题",
+        placeholder="例如：chunk 大小一般怎么选？块之间要重叠多少？",
+        key="rag_question",
+    )
+    top_k = st.slider("检索片段数 top-k", min_value=1, max_value=5, value=3)
+    asked = st.button("提问", type="primary", key="rag_ask")
+
+    if not asked:
+        return
+    if not question.strip():
+        st.warning("请输入问题。")
+        return
+
+    try:
+        with st.spinner("正在检索并生成回答……"):
+            result = answer_question(
+                client, question, load_retriever(), top_k=top_k, temperature=temperature
+            )
+    except Exception as exc:  # noqa: BLE001 - 界面需要展示任何调用错误
+        st.error(f"调用失败：{exc}")
+        return
+
+    st.subheader("回答")
+    st.markdown(result.answer)
+    if result.invalid_citations:
+        st.warning(f"模型给出了不存在的引用编号：{list(result.invalid_citations)}")
+
+    with st.expander(f"检索到的资料（top-{len(result.hits)}）"):
+        for number, hit in enumerate(result.hits, start=1):
+            st.markdown(f"**[{number}] {hit.chunk.title}** · 相似度 {hit.score:.3f}")
+            st.code(hit.chunk.text, language="text")
+
+
+def main() -> None:
+    st.set_page_config(page_title="LLM Learning Lab", page_icon="🧪", layout="centered")
+    st.title("🧪 LLM Learning Lab")
+    st.caption("一个用于练习大模型应用开发的小项目：提示词、RAG、评测。学习示例，不是生产系统。")
+
+    try:
+        settings = load_settings()
+    except ConfigError as exc:
+        st.error(f"未配置 API Key：{exc}")
+        st.info("复制 `.env.example` 为 `.env` 并填入 Key，然后重启应用。")
+        st.stop()
+
+    with st.sidebar:
+        st.subheader("当前配置")
+        st.write(f"**接口**：`{settings.base_url}`")
+        st.write(f"**模型**：`{settings.model}`")
+        st.write(f"**密钥**：`{settings.masked_api_key}`")
+        temperature = st.slider("temperature（越低越稳定）", 0.0, 1.0, 0.0, 0.1)
+        if st.button("问卷填入示例数据", use_container_width=True):
+            for question in SURVEY_QUESTIONS:
+                st.session_state[question["key"]] = SAMPLE_ANSWERS[question["key"]]
+            st.rerun()
+
+    client = LLMClient(settings)
+    survey_tab, rag_tab = st.tabs(["📝 学习需求问卷", "📚 课程笔记问答（RAG）"])
+    with survey_tab:
+        render_survey(client, temperature)
+    with rag_tab:
+        render_rag(client, temperature)
 
 
 if __name__ == "__main__":
