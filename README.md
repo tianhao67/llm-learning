@@ -119,6 +119,7 @@ python evals/run_eval.py --task rag --top-k 3 --generate
 │   └── notes.md               # 学习笔记：接口原理、提示词技巧、报错排查
 ├── .github/workflows/ci.yml   # GitHub Actions
 ├── .env.example               # 环境变量模板
+├── requirements.txt           # 部署用依赖（Cloud / Spaces）
 ├── pyproject.toml             # 依赖、ruff、pytest 配置
 └── LICENSE
 ```

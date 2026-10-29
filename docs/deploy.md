@@ -20,10 +20,12 @@
 
 注意事项：
 
-- 平台会自动安装 `pyproject.toml` 里的依赖，不需要额外提交 `requirements.txt`；
+- 仓库根目录的 `requirements.txt` 是给云端安装依赖用的，本地开发仍以 `pyproject.toml`
+  为准（`pip install -e ".[dev]"`），两边依赖要保持一致；
 - **密钥只填在 Secrets 里**，不要写进代码或 `.env` 后提交；
 - 免费实例会休眠，第一次打开可能较慢，这是正常现象；
-- 如果部署失败，先看构建日志里的依赖错误，再本地执行 `pip install -e .` 复现。
+- 如果部署失败，先看构建日志里的依赖错误，再本地执行 `pip install -r requirements.txt`
+  复现。
 
 ## 方案二：Hugging Face Spaces
 
