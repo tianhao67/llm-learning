@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import streamlit as st
@@ -17,6 +18,9 @@ from llm_demo.rag import Retriever, answer_question
 ROOT = Path(__file__).resolve().parent
 CORPUS_DIR = ROOT / "data" / "corpus"
 
+#: 需要从 Streamlit Secrets 注入环境变量的配置项
+SECRET_KEYS = ("OPENAI_API_KEY", "OPENAI_BASE_URL", "OPENAI_MODEL")
+
 SAMPLE_ANSWERS: dict[str, str] = {
     "city_job": "在南京读大三，信息安全专业，目前没有实习经历。",
     "awareness": "会调用大模型 API，了解 Transformer 的基本结构，但没有训练过模型。",
@@ -27,9 +31,28 @@ SAMPLE_ANSWERS: dict[str, str] = {
 }
 
 
+def apply_streamlit_secrets() -> None:
+    """把 Streamlit Cloud 的 Secrets 注入环境变量。
+
+    本地开发用 ``.env``；云端没有 ``.env`` 文件，配置放在 ``st.secrets`` 里。
+    这里统一成环境变量，``Settings.from_env()`` 只需要维护一套读取逻辑。
+
+    注意：没有 ``secrets.toml`` 时，``st.secrets`` 的取值会抛 ``FileNotFoundError``，
+    所以整段都包在 try 里，本地运行时直接跳过即可。
+    """
+    try:
+        secrets = st.secrets
+        for key in SECRET_KEYS:
+            if key in secrets and not os.environ.get(key):
+                os.environ[key] = str(secrets[key])
+    except Exception:  # noqa: BLE001 - 本地没有 secrets.toml 属于正常情况
+        return
+
+
 @st.cache_resource(show_spinner=False)
 def load_settings() -> Settings:
     """整个会话只读取一次配置。"""
+    apply_streamlit_secrets()
     return Settings.from_env()
 
 
@@ -129,7 +152,11 @@ def main() -> None:
         settings = load_settings()
     except ConfigError as exc:
         st.error(f"未配置 API Key：{exc}")
-        st.info("复制 `.env.example` 为 `.env` 并填入 Key，然后重启应用。")
+        st.info(
+            "**本地运行**：把 `.env.example` 复制为 `.env` 并填入 Key；"
+            "**Streamlit Cloud**：在 App 右下角 Manage app → Settings → Secrets "
+            "里配置 `OPENAI_API_KEY`、`OPENAI_BASE_URL`、`OPENAI_MODEL`，保存后 Reboot。"
+        )
         st.stop()
 
     with st.sidebar:
