@@ -51,7 +51,7 @@ client = OpenAI(api_key=..., base_url="https://api.deepseek.com")
 
 模型不保证返回合法 JSON，常见情况：
 
-- 包在 ` ```json ... ``` ` 代码块里；
+- 包在 Markdown 代码块里（以三个反引号加 json 开头）；
 - 前后多一句「好的，以下是结果」；
 - 字段名被改写、数组被写成字符串。
 

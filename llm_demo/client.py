@@ -62,5 +62,5 @@ class LLMClient:
         return (response.choices[0].message.content or "").strip()
 
     def chat_json(self, prompt: str, **kwargs: Any) -> Any:
-        """要求模型输出 JSON，并自动去掉 ```json 代码块等包装后解析。"""
+        """要求模型输出 JSON，并自动去掉 Markdown 代码块等包装后解析。"""
         return extract_json(self.chat(prompt, **kwargs))
