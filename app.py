@@ -39,6 +39,12 @@ def load_retriever() -> Retriever:
     return Retriever.from_directory(CORPUS_DIR)
 
 
+@st.cache_resource(show_spinner=False)
+def get_client(settings: Settings) -> LLMClient:
+    """缓存客户端，避免每次交互都新建连接。"""
+    return LLMClient(settings)
+
+
 def render_survey(client: LLMClient, temperature: float) -> None:
     st.markdown("填写 6 个问题，模型会给出个性化的学习路径建议。可展开查看完整提示词，方便调试。")
 
@@ -137,7 +143,7 @@ def main() -> None:
                 st.session_state[question["key"]] = SAMPLE_ANSWERS[question["key"]]
             st.rerun()
 
-    client = LLMClient(settings)
+    client = get_client(settings)
     survey_tab, rag_tab = st.tabs(["📝 学习需求问卷", "📚 课程笔记问答（RAG）"])
     with survey_tab:
         render_survey(client, temperature)

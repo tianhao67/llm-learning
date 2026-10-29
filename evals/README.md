@@ -3,7 +3,7 @@
 ```
 evals/
 ├── cases/              # 评测集（jsonl，一行一条）
-│   ├── classify.jsonl  # 情感分类 30 条
+│   ├── classify.jsonl  # 情感分类 38 条（含 8 条隐式表达）
 │   ├── survey.jsonl    # 问卷建议 12 条
 │   └── rag.jsonl       # 课程笔记问答 15 条
 ├── results/            # 运行结果（markdown，会提交到仓库作为记录）
